@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
+
+import 'package:task_manager/providers/task_provider.dart';
+import 'package:task_manager/tasks_theme.dart';
 import 'package:task_manager/widgets/greet_profile_banner.dart';
+import 'package:task_manager/widgets/small_todo_card.dart';
 import 'package:task_manager/widgets/task_card.dart';
 
 class TasksPage extends StatelessWidget {
   const TasksPage({Key? key}) : super(key: key);
 
-  static const List<Widget> taskCards = [
-    TaskCard(),
-    TaskCard(),
-    TaskCard(),
-    TaskCard()
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final tasksData = Provider.of<TaskProvider>(context);
+    final tasksList = tasksData.listOfTasks;
+    var filteredToDo = [...tasksList.where((e) => e.status == "To-Do")];
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: SingleChildScrollView(
@@ -33,13 +35,10 @@ class TasksPage extends StatelessWidget {
               text: new TextSpan(
                 // Note: Styles for TextSpans must be explicitly defined.
                 // Child text spans will inherit styles from parent
-                style: new TextStyle(
-                  fontSize: 25.0,
-                  color: Colors.black,
-                ),
+                style: TasksTheme.of(context).fontStyleHeader32,
                 children: <TextSpan>[
                   new TextSpan(
-                      text: '4 New ',
+                      text: '${tasksList.length} New ',
                       style: new TextStyle(fontWeight: FontWeight.bold)),
                   new TextSpan(
                     text: 'tasks today',
@@ -54,9 +53,12 @@ class TasksPage extends StatelessWidget {
               height: 250,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: taskCards.length,
+                itemCount: tasksList.length,
                 itemBuilder: (context, index) {
-                  return taskCards[index];
+                  return ChangeNotifierProvider.value(
+                    value: tasksList[index],
+                    child: TaskCard(),
+                  );
                 },
               ),
             ),
@@ -67,10 +69,7 @@ class TasksPage extends StatelessWidget {
               text: new TextSpan(
                 // Note: Styles for TextSpans must be explicitly defined.
                 // Child text spans will inherit styles from parent
-                style: new TextStyle(
-                  fontSize: 25.0,
-                  color: Colors.black,
-                ),
+                style: TasksTheme.of(context).fontStyleHeader32,
                 children: <TextSpan>[
                   new TextSpan(
                     text: 'To ',
@@ -81,9 +80,31 @@ class TasksPage extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(
+              height: 160,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: filteredToDo.length,
+                itemBuilder: (context, index) {
+                  return ChangeNotifierProvider.value(
+                    value: filteredToDo[index],
+                    child: SmallToDoCard(),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+// Padding(
+//           padding: EdgeInsets.all(8.0),
+//           child: Icon(
+//             Icons.add_circle_rounded,
+//             color: Theme.of(context).accentColor,
+//             size: 40,
+//           ),
+//         ),
